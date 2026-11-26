@@ -126,7 +126,7 @@ export const register: Register = on => {
       }
     }
     return next(e)
-  })
+  }).catch(($, e, next) => next.called ? next(e) : next(e))
 
   on('tool.call', { tool: 'Write' }, async ($, e, next) => {
     const list = await read($, rulesAtom)
@@ -137,7 +137,7 @@ export const register: Register = on => {
       }
     }
     return next(e)
-  })
+  }).catch(($, e, next) => next.called ? next(e) : next(e))
 
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     const list = await read($, rulesAtom)
@@ -148,5 +148,5 @@ export const register: Register = on => {
       }
     }
     return next(e)
-  })
+  }).catch(($, e, next) => next.called ? next(e) : next(e))
 }
