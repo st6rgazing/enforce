@@ -2,6 +2,7 @@
   "name": "enforce",
   "version": "0.1.0",
   "description": "Compile CLAUDE.md rules into live hooks — /enforce to run",
-  "author": "st6rgazing",
+  "author": { "name": "st6rgazing" },
+  "license": "MIT",
   "types": "./types/index.d.ts"
 }
