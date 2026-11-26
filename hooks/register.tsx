@@ -22,5 +22,11 @@ const violationsAtom = atom(
 )
 
 export const register: Register = on => {
-  // placeholder — hooks added next
+  on('session.start', async ($, e, next) => {
+    await $.command.register({
+      name: 'enforce',
+      description: 'Compile CLAUDE.md rules into live hooks',
+    })
+    return next(e)
+  })
 }
