@@ -43,6 +43,10 @@ export const register: Register = on => {
       name: 'enforce',
       description: 'Compile CLAUDE.md rules into live hooks',
     })
+    await $.command.register({
+      name: 'enforce-violations',
+      description: 'Show rule violation counts for this session',
+    })
     return next(e)
   })
 
