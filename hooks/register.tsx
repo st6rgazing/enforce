@@ -97,4 +97,37 @@ export const register: Register = on => {
 
     return { text: lines.join('\n') }
   })
+
+  on('tool.call', { tool: 'Edit' }, async ($, e, next) => {
+    const list = await read($, rulesAtom)
+    for (const rule of list) {
+      if (rule.type === 'file-protect' && rule.pattern && new RegExp(rule.pattern).test(e.file_path)) {
+        await update($, violationsAtom, v => ({ ...v, [rule.id]: (v[rule.id] ?? 0) + 1 }))
+        return { deny: `[enforce] ${rule.message}` }
+      }
+    }
+    return next(e)
+  })
+
+  on('tool.call', { tool: 'Write' }, async ($, e, next) => {
+    const list = await read($, rulesAtom)
+    for (const rule of list) {
+      if (rule.type === 'file-protect' && rule.pattern && new RegExp(rule.pattern).test(e.file_path)) {
+        await update($, violationsAtom, v => ({ ...v, [rule.id]: (v[rule.id] ?? 0) + 1 }))
+        return { deny: `[enforce] ${rule.message}` }
+      }
+    }
+    return next(e)
+  })
+
+  on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
+    const list = await read($, rulesAtom)
+    for (const rule of list) {
+      if (rule.type === 'bash-deny' && rule.pattern && new RegExp(rule.pattern).test(e.command)) {
+        await update($, violationsAtom, v => ({ ...v, [rule.id]: (v[rule.id] ?? 0) + 1 }))
+        return { deny: `[enforce] ${rule.message}` }
+      }
+    }
+    return next(e)
+  })
 }
