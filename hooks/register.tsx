@@ -102,6 +102,21 @@ export const register: Register = on => {
     return { text: lines.join('\n') }
   })
 
+  on('command.run', { command: 'enforce-violations' }, async $ => {
+    const counts = await read($, violationsAtom)
+    const list = await read($, rulesAtom)
+    const total = Object.values(counts).reduce((a, b) => a + b, 0)
+
+    if (total === 0) return { text: 'No violations blocked yet.' }
+
+    const lines: string[] = [`${total} violation${total === 1 ? '' : 's'} blocked:`]
+    for (const rule of list) {
+      const n = counts[rule.id] ?? 0
+      if (n > 0) lines.push(`  ${n}x  ${rule.original}`)
+    }
+    return { text: lines.join('\n') }
+  })
+
   on('tool.call', { tool: 'Edit' }, async ($, e, next) => {
     const list = await read($, rulesAtom)
     for (const rule of list) {
