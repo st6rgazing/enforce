@@ -1,5 +1,7 @@
 {
   "name": "enforce",
   "version": "0.1.0",
-  "description": "Compile CLAUDE.md rules into live hooks — /enforce to run"
+  "description": "Compile CLAUDE.md rules into live hooks — /enforce to run",
+  "author": "st6rgazing",
+  "types": "./types/index.d.ts"
 }
