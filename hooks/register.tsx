@@ -45,4 +45,56 @@ export const register: Register = on => {
     })
     return next(e)
   })
+
+  on('command.run', { command: 'enforce' }, async $ => {
+    let claudeMd: string
+    try {
+      claudeMd = await $.fs.read('CLAUDE.md')
+    } catch {
+      return { text: 'No CLAUDE.md found in this project.' }
+    }
+
+    $.ui.status('enforce: analyzing…')
+
+    const result = await $.model.complete({
+      model: 'haiku',
+      prompt: PROMPT(claudeMd),
+      effort: 'low',
+    })
+
+    $.ui.status(undefined)
+
+    if (!result.isAnswered) {
+      return { text: `enforce: analysis failed (${result.reason})` }
+    }
+
+    let parsed: { rules: Rule[] }
+    try {
+      const json = result.text.match(/\{[\s\S]*\}/)?.at(0) ?? result.text
+      parsed = JSON.parse(json) as { rules: Rule[] }
+    } catch {
+      return { text: `enforce: could not parse model output\n${result.text}` }
+    }
+
+    await update($, rulesAtom, () => parsed.rules)
+
+    const enforced = parsed.rules.filter(r => r.type !== 'behavioral')
+    const behavioral = parsed.rules.filter(r => r.type === 'behavioral')
+
+    const lines: string[] = [
+      `Compiled ${parsed.rules.length} rules from CLAUDE.md`,
+      `  ${enforced.length} enforced by hooks`,
+      `  ${behavioral.length} behavioral (noted only)`,
+    ]
+    if (enforced.length > 0) {
+      lines.push('', 'Enforced:')
+      enforced.forEach(r => lines.push(`  • ${r.original}`))
+    }
+    if (behavioral.length > 0) {
+      lines.push('', 'Behavioral (not enforced):')
+      behavioral.forEach(r => lines.push(`  • ${r.original}`))
+    }
+
+    return { text: lines.join('\n') }
+  })
 }
